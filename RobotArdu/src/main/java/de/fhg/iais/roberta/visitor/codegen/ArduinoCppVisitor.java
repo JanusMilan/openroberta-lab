@@ -454,10 +454,6 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
         if ( (this.configuration.getConfigurationComponents().isEmpty() || this.getBean(UsedHardwareBean.class).isSensorUsed(SC.TIMER)) && (numberConf == 0) ) {
             nlIndent();
         }
-        generateUserDefinedMethods();
-        if ( numberConf != 0 ) {
-            nlIndent();
-        }
         for ( UsedSensor usedSensor : this.getBean(UsedHardwareBean.class).getUsedSensors() ) {
             if ( usedSensor.getType().equals(SC.INFRARED) && !configuration.getRobotName().equals("unowifirev2") ) { // TODO remove once infrared library is supported for unowifirev2
                 nlIndent();
@@ -480,12 +476,10 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
                 break;
             }
         }
-
         generateUserDefinedMethods();
         if ( numberConf != 0 ) {
             nlIndent();
         }
-
         this.sb.append("void setup()");
         nlIndent();
         this.sb.append("{");
@@ -517,13 +511,12 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
         nlIndent();
         this.sb.append("#include <Arduino.h>");
         nlIndent();
-        this.sb.append("#include <math.h>");
         nlIndent();
         LinkedHashSet<String> headerFiles = new LinkedHashSet<>();
         for ( ConfigurationComponent usedConfigurationBlock : this.configuration.getConfigurationComponentsValues() ) {
             switch ( usedConfigurationBlock.getComponentType() ) {
                 case SC.HUMIDITY:
-                    headerFiles.add("#include <DHT/DHT.h>");
+                    headerFiles.add("#include <DHT_sensor_library/DHT.h>");
                     break;
                 case SC.INFRARED:
                     if ( !configuration.getRobotName().equals("unowifirev2") ) { // TODO remove once infrared library is supported for unowifirev2
@@ -541,7 +534,7 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
                     nlIndent();
                     break;
                 case SC.LCDI2C:
-                    headerFiles.add("#include <Arduino-LiquidCrystal-I2C/LiquidCrystal_I2C.h>");
+                    headerFiles.add("#include <LiquidCrystal_I2C/LiquidCrystal_I2C.h>");
                     break;
                 case SC.STEPMOTOR:
                     headerFiles.add("#include <Stepper/src/Stepper.h>");
@@ -579,15 +572,7 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
             this.sb.append(header);
             nlIndent();
         }
-        if ( this.getBean(UsedHardwareBean.class).isListsUsed() ) {
-            this.sb.append("#include <ArduinoSTL/src/ArduinoSTL.h>");
-            nlIndent();
-            this.sb.append("#include <list>");
-            nlIndent();
-        }
         this.sb.append("#include <RobertaFunctions/NEPODefs.h>");
-        nlIndent();
-        generateSignaturesOfUserDefinedMethods();
         nlIndent();
 
         super.generateProgramPrefix(withWrapping);

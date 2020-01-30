@@ -122,24 +122,23 @@ public class SenseboxCppVisitor extends AbstractCommonArduinoCppVisitor implemen
         this.sb.append("#undef min\n");
         this.sb.append("#include <NEPODefs.h>\n");
         this.sb.append("#include \"SenseBoxMCU.h\"");
-        if ( this.configuration.getConfigurationComponentbyType(SC.SENSEBOX_SDCARD) != null ) {
+        if ( this.configuration.getConfigurationComponentbyType(SC.SENSEBOX_SDCARD) != null || this.configuration.getConfigurationComponentbyType(SC.LCDI2C) != null) {
             this.sb.append("\n#include <SPI.h>");
+        }
+        if ( this.configuration.getConfigurationComponentbyType(SC.SENSEBOX_SDCARD) != null ) {
             this.sb.append("\n#include <SD.h>");
         }
-
         if ( this.configuration.getConfigurationComponentbyType(SC.LCDI2C) != null ) {
-            this.sb.append("\n#include <SPI.h>");
             this.sb.append("\n#include <Wire.h>");
             this.sb.append("\n#include <Adafruit_GFX.h>");
             this.sb.append("\n#include <Adafruit_SSD1306.h>");
             this.sb.append("\n#include <Plot.h>");
         }
-
         if ( this.getBean(UsedHardwareBean.class).isListsUsed() ) {
             this.sb.append("\n#include <stdlib.h>");
-            this.sb.append("\n#include <list>");
         }
-
+        nlIndent();
+        nlIndent();
         super.generateProgramPrefix(withWrapping);
     }
 

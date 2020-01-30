@@ -2,7 +2,6 @@
 
 #define ANALOG2PERCENT 0.0978
 
-#include <math.h>
 #include <MeMCore.h>
 #include <Wire.h>
 #include <SoftwareSerial.h>

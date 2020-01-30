@@ -2,7 +2,6 @@
 
 
 #include <Arduino.h>
-#include <math.h>
 #include <LiquidCrystal/src/LiquidCrystal.h>
 #include <RobertaFunctions/NEPODefs.h>
 

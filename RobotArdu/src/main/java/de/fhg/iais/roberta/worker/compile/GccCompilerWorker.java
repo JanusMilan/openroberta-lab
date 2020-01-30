@@ -1,7 +1,15 @@
 package de.fhg.iais.roberta.worker.compile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +29,8 @@ public class GccCompilerWorker implements IWorker {
     @Override
     public void execute(Project project) {
         CompilerSetupBean compilerWorkflowBean = project.getWorkerResult(CompilerSetupBean.class);
-        final String compilerResourcesDir = compilerWorkflowBean.getCompilerResourcesDir();
-        final String tempDir = compilerWorkflowBean.getTempDir();
+        String compilerResourcesDir = compilerWorkflowBean.getCompilerResourcesDir();
+        String tempDir = compilerWorkflowBean.getTempDir();
         String programName = project.getProgramName();
         String token = project.getToken();
         Util.storeGeneratedProgram(tempDir, project.getSourceCode().toString(), token, programName, "." + project.getSourceCodeFileExtension());
@@ -42,24 +50,44 @@ public class GccCompilerWorker implements IWorker {
                 arduinoVariant = "ARDUINO_AVR_" + project.getRobot().toUpperCase();
                 arduinoArch = "ARDUINO_ARCH_AVR";
                 break;
+            case "mbot":
+                boardVariant = "standard";
+                mmcu = "atmega328p";
+                arduinoVariant = "ARDUINO_AVR_UNO";
+                arduinoArch = "ARDUINO_ARCH_AVR";
+                scriptName = compilerResourcesDir + "arduino-resources/build_project_mbot.sh";
+                break;
+            case "botnroll":
+                boardVariant = "standard";
+                mmcu = "atmega328p";
+                arduinoVariant = "ARDUINO_AVR_UNO";
+                arduinoArch = "ARDUINO_ARCH_AVR";
+                scriptName = compilerResourcesDir + "arduino-resources/build_project_botnroll.sh";
+                break;
             case "unowifirev2":
                 boardVariant = "uno2018";
                 mmcu = "atmega4809";
                 arduinoVariant = "ARDUINO_AVR_UNO_WIFI_REV2";
-                arduinoArch = "ARDUINO_ARCH_MEGAAVR -DUNO_WIFI_REV2_328MODE -DMILLIS_USE_TIMERB3";
+                arduinoArch = "ARDUINO_ARCH_MEGAAVR";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_unowifirev2.sh";
                 break;
             case "mega":
                 boardVariant = "mega";
                 mmcu = "atmega2560";
-                arduinoVariant = "ARDUINO_AVR_" + project.getRobot().toUpperCase();
-                arduinoArch = "ARDUINO_ARCH_MEGAAVR";
+                arduinoVariant = "ARDUINO_AVR_MEGA2560";
+                arduinoArch = "ARDUINO_ARCH_AVR";
                 break;
             case "sensebox":
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_sensebox.sh";
                 break;
+            case "bob3":
+                scriptName = compilerResourcesDir + "arduino-resources/build_project_bob3.sh";
+                break;
+            case "festobionic":
+                scriptName = compilerResourcesDir + "arduino-resources/build_project_festobionic.sh";
+                break;
             default:
-                throw new DbcException("Unsupported Arduino type");
+                throw new DbcException("Unsupported Arduino type: " + project.getRobot());
         }
 
         String buildDir = tempDir + token + "/" + programName + "/source";
@@ -80,8 +108,45 @@ public class GccCompilerWorker implements IWorker {
         Pair<Boolean, String> result = AbstractCompilerWorkflow.runCrossCompiler(executableWithParameters);
         Key resultKey = result.getFirst() ? Key.COMPILERWORKFLOW_SUCCESS : Key.COMPILERWORKFLOW_ERROR_PROGRAM_COMPILE_FAILED;
         if ( result.getFirst() ) {
-            String base64EncodedHex =
-                AbstractCompilerWorkflow.getBase64EncodedHex(Paths.get(userProgramDirPath) + "/target/" + programName + "." + project.getBinaryFileExtension());
+            String base64EncodedHex = null;
+            switch ( project.getBinaryFileExtension() ) {
+                case "hex":
+                    base64EncodedHex =
+                        AbstractCompilerWorkflow.getBase64EncodedHex(Paths.get(userProgramDirPath) + "/target/" + programName + "." + project.getBinaryFileExtension());
+                    break;
+                case "bin":
+                    base64EncodedHex =
+                        AbstractCompilerWorkflow.getBase64EncodedBinary(Paths.get(userProgramDirPath) + "/target/" + programName + "." + project.getBinaryFileExtension());
+                    break;
+                case "zip":
+                    // as we currently only support sending a single file to robots and esp32 needs two files, they are zipped and send the zip is sent to the Connector
+                    // the connector then unzips the files and correctly flashes them to the robot
+                    // in order to circumvent large changes
+                    Path path = Paths.get(tempDir + project.getToken() + "/" + project.getProgramName());
+                    Path base = Paths.get("");
+                    try (FileOutputStream fos = new FileOutputStream(base.resolve(path).toAbsolutePath().normalize() + "/target/" + project.getProgramName() + "." + project.getBinaryFileExtension());
+                        ZipOutputStream zos = new ZipOutputStream(fos)) {
+                        for ( File srcFile : base.resolve(path + "/target").toFile().listFiles() ) {
+                            if (!srcFile.getName().endsWith(project.getBinaryFileExtension())) {
+                                try (FileInputStream fis = new FileInputStream(srcFile)) {
+                                    ZipEntry zipEntry = new ZipEntry(srcFile.getName());
+                                    zos.putNextEntry(zipEntry);
+                                    byte[] bytes = new byte[1024];
+                                    int length;
+                                    while ( (length = fis.read(bytes)) >= 0 ) {
+                                        zos.write(bytes, 0, length);
+                                    }
+                                }
+                            }
+                        }
+                        FileUtils.readFileToString(new File(base.resolve(path).toAbsolutePath().normalize() + "/target/" + project.getProgramName() + "." + project.getBinaryFileExtension()), "UTF-8");
+                    } catch ( IOException e ) {
+                        LOG.warn("The generated esp32 build files could not be zipped:", e);
+                    }
+                    break;
+                default:
+                    throw new DbcException("Unsupported file extension: " + project.getRobot());
+            }
             project.setCompiledHex(base64EncodedHex);
             if ( project.getCompiledHex() != null ) {
                 resultKey = Key.COMPILERWORKFLOW_SUCCESS;
