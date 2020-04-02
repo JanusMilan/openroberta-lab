@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <Stepper/src/Stepper.h>
-#include <RobertaFunctions/NEPODefs.h>
+#include <NEPODefs.h>
 
 
 int _SPU_S2 = 2048;

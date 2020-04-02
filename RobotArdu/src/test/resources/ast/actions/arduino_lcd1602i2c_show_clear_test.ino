@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <LiquidCrystal_I2C/LiquidCrystal_I2C.h>
-#include <RobertaFunctions/NEPODefs.h>
+#include <NEPODefs.h>
 
 
 LiquidCrystal_I2C _lcd_L(0x27, 16, 2);

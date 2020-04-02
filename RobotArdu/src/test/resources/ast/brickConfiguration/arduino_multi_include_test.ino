@@ -2,9 +2,8 @@
 
 #include <Arduino.h>
 #include <Servo/src/Servo.h>
-#include <SPI.h>
 #include <MFRC522/src/MFRC522.h>
-#include <RobertaFunctions/NEPODefs.h>
+#include <NEPODefs.h>
 
 
 String ___item;

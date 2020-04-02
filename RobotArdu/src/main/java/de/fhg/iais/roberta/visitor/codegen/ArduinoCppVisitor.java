@@ -525,7 +525,6 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
                     break;
                 case SC.RFID:
                     if ( !configuration.getRobotName().equals("unowifirev2") ) { // TODO remove once rfid library is supported for unowifirev2
-                        headerFiles.add("#include <SPI.h>");
                         headerFiles.add("#include <MFRC522/src/MFRC522.h>");
                     }
                     break;
@@ -572,7 +571,7 @@ public final class ArduinoCppVisitor extends AbstractCommonArduinoCppVisitor imp
             this.sb.append(header);
             nlIndent();
         }
-        this.sb.append("#include <RobertaFunctions/NEPODefs.h>");
+        this.sb.append("#include <NEPODefs.h>");
         nlIndent();
 
         super.generateProgramPrefix(withWrapping);

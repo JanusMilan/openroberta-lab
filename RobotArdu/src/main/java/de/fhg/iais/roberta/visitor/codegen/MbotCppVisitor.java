@@ -557,10 +557,6 @@ public final class MbotCppVisitor extends AbstractCommonArduinoCppVisitor implem
         nlIndent();
         this.sb.append("#include <MeMCore.h>");
         nlIndent();
-        this.sb.append("#include <Wire.h>");
-        nlIndent();
-        this.sb.append("#include <SoftwareSerial.h>");
-        nlIndent();
         this.sb.append("#include <MeDrive.h>");
         nlIndent();
         this.sb.append("#include <NEPODefs.h>");

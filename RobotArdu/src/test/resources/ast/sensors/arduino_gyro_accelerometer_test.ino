@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include <SparkFun_LSM6DS3_Breakout/src/SparkFunLSM6DS3.h>
-#include <RobertaFunctions/NEPODefs.h>
+#include <NEPODefs.h>
 
 
 String ___Element;

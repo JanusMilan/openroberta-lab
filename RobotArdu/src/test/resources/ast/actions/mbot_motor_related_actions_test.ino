@@ -3,8 +3,6 @@
 #define ANALOG2PERCENT 0.0978
 
 #include <MeMCore.h>
-#include <Wire.h>
-#include <SoftwareSerial.h>
 #include <MeDrive.h>
 #include <NEPODefs.h>
 
