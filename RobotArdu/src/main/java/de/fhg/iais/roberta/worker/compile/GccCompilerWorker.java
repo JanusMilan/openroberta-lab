@@ -48,43 +48,50 @@ public class GccCompilerWorker implements IWorker {
                 boardVariant = "standard";
                 mmcu = "atmega328p";
                 arduinoVariant = "ARDUINO_AVR_" + project.getRobot().toUpperCase();
-                arduinoArch = "ARDUINO_ARCH_AVR";
+                arduinoArch = "avr";
                 break;
             case "mbot":
                 boardVariant = "standard";
                 mmcu = "atmega328p";
                 arduinoVariant = "ARDUINO_AVR_UNO";
-                arduinoArch = "ARDUINO_ARCH_AVR";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_mbot.sh";
+                arduinoArch = "avr";
                 break;
             case "botnroll":
                 boardVariant = "standard";
                 mmcu = "atmega328p";
                 arduinoVariant = "ARDUINO_AVR_UNO";
-                arduinoArch = "ARDUINO_ARCH_AVR";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_botnroll.sh";
+                arduinoArch = "avr";
                 break;
             case "unowifirev2":
                 boardVariant = "uno2018";
                 mmcu = "atmega4809";
                 arduinoVariant = "ARDUINO_AVR_UNO_WIFI_REV2";
-                arduinoArch = "ARDUINO_ARCH_MEGAAVR";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_unowifirev2.sh";
+                arduinoArch = "megaavr";
                 break;
             case "mega":
                 boardVariant = "mega";
                 mmcu = "atmega2560";
                 arduinoVariant = "ARDUINO_AVR_MEGA2560";
-                arduinoArch = "ARDUINO_ARCH_AVR";
+                arduinoArch = "avr";
                 break;
             case "sensebox":
+                boardVariant = "sensebox_mcu";
+                arduinoVariant = "ARDUINO_SAMD_MKR1000";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_sensebox.sh";
+                arduinoArch = "samd";
                 break;
             case "bob3":
+                mmcu = "atmega88";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_bob3.sh";
                 break;
             case "festobionic":
+                boardVariant = "esp32";
+                arduinoVariant = "ARDUINO_ESP32_DEV";
                 scriptName = compilerResourcesDir + "arduino-resources/build_project_festobionic.sh";
+                arduinoArch = "esp32";
                 break;
             default:
                 throw new DbcException("Unsupported Arduino type: " + project.getRobot());
